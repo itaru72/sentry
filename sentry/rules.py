@@ -7,9 +7,12 @@ import dns.rrset
 import dns.query
 import dns.name
 
-from sentry import stats, errors, profile
+#from sentry import stats, errors, profile
+from sentry import errors, profile
 
 log = logging.getLogger(__name__)
+log.setLevel(logging.WARNING)
+
 RETRIES = 3
 DEFAULT_TTL = 300
 DEFAULT_TIMEOUT = 1.0
@@ -71,7 +74,8 @@ class BlockRule(Rule):
     @profile.howfast
     def dispatch(self, message, *args, **extras):
         context = extras.pop('context', {})
-        log.warn('blocking query: %s matched by rule: %s with context: %s' % (message.question[0].name, self.domain, context) )
+        #log.warn('blocking query: %s matched by rule: %s with context: %s' % (message.question[0].name, self.domain, context) )
+        log.warning('Result=BLOCK:	%s	by:	%s'  % (message.question[0].name, self.domain) )
         response = dns.message.make_response(message)
         return response.to_wire()
 
@@ -154,6 +158,10 @@ class ResolveRule(Rule):
 
         self.resolvers =  map(lambda x: x.strip(), resolvers.split(','))
         log.debug('resolvers: %s' % self.resolvers)
+        #log.warning('ResolverRule::__init__() domain: %s' % domain)
+        #if True == domain.endswith('$'):
+        #domain = domain + '$'
+        #log.warning('ResolverRule::__init__() domain expected to means %s since ends with .(dot) ' % (domain))
 
         # how long we wait on upstream dns servers before puking
         self.timeout = settings.get('resolution_timeout', DEFAULT_TIMEOUT)
@@ -176,6 +184,7 @@ class ResolveRule(Rule):
         result = futures.wait(fs,return_when=futures.FIRST_COMPLETED).done.pop()
 
         if not result.exception():
+            log.warning('Result=PASS:	%s	by:	%s'  % (message.question[0].name, self.domain) )
             return result.result()
 
         else:

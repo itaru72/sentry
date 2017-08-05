@@ -3,6 +3,7 @@ import re, sys, logging
 from sentry import rules, profile
 
 log = logging.getLogger(__name__)
+log.setLevel(logging.WARNING)
 
 RULES = [
 	rules.RedirectRule,

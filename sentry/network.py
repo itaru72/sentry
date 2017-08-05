@@ -1,10 +1,12 @@
 
 import logging, sys, os, socket, time, threading, futures
 
-from sentry import errors, stats, profile
+#from sentry import errors, stats, profile
+from sentry import errors, profile
 
 
 log = logging.getLogger(__name__)
+log.setLevel(logging.WARNING)
 
 
 class Server(object):
@@ -44,12 +46,13 @@ class Server(object):
                 if not data:
                     self.close()
                     return
-                stats.add('net.packets_received', 1)
-                stats.add('net.bytes_received', len(data))
+                #stats.add('net.packets_received', 1)
+                #stats.add('net.bytes_received', len(data))
                 self.threadpool.submit(self.worker, (data, addr))
 
             except Exception as ex:
-                log.exception(ex)
+                #log.exception(ex)
+                log.info(ex)
 
 
     def start(self):
@@ -76,7 +79,7 @@ class Server(object):
         log.debug('starting to process request...')
         data, addr = info
         self.active_threads += 1
-        stats.add_avg('net.active_threads', self.active_threads)
+        #stats.add_avg('net.active_threads', self.active_threads)
         try:
             response = self.onreceive(data, {
                 'client' : '%s:%s' % (addr),
@@ -84,15 +87,16 @@ class Server(object):
                 })
 
             s = self.udp_socket.sendto(response, addr)
-            stats.add('net.packets_sent', 1)
-            stats.add('net.bytes_sent', s)
+            #stats.add('net.packets_sent', 1)
+            #stats.add('net.bytes_sent', s)
             log.debug('finished to process request...')
 
         except Exception as e:
-            log.exception(e)
+            #log.exception(e)
+            log.info(e)
 
         self.active_threads -= 1
-        stats.add_avg('net.active_threads', self.active_threads)
+        #stats.add_avg('net.active_threads', self.active_threads)
 
 
 

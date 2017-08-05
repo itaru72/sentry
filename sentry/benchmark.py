@@ -69,7 +69,7 @@ class SentryBenchmark(object):
 
 
         log.info('starting processing...')
-        self.stats = counter.Counter()
+        #self.stats = counter.Counter()
 
         processed_entries = 0
 
@@ -90,12 +90,13 @@ class SentryBenchmark(object):
                 response_elapsed_time = (time.time() - response_start_time)*1000
 
                 log.debug('query in %d msec' % response_elapsed_time)
-                self.stats.add_avg('response_time_msec', response_elapsed_time  )
-                self.stats.add('queries_successful')
+                #self.stats.add_avg('response_time_msec', response_elapsed_time  )
+                #self.stats.add('queries_successful')
 
             except Exception as e:
-                log.exception(e)
-                self.stats.add('queries_failed')
+                #log.exception(e)
+                log.info(e)
+                #self.stats.add('queries_failed')
 
 
         fs = []
@@ -120,15 +121,15 @@ class SentryBenchmark(object):
         log.info('benchmark done')
         elapsed_time_seconds = int(time.time() - start_time)
         elapsed_time_seconds = elapsed_time_seconds if elapsed_time_seconds > 0 else 1
-        self.stats.add('elapsed_time_seconds', elapsed_time_seconds )
-        self.stats.add('queries_per_second', int(processed_entries/elapsed_time_seconds) )
+        #self.stats.add('elapsed_time_seconds', elapsed_time_seconds )
+        #self.stats.add('queries_per_second', int(processed_entries/elapsed_time_seconds) )
 
         # dumping results:
         x = prettytable.PrettyTable(['metric', 'value'])
         x.align = 'l'
 
-        for r in self.stats.get_metrics():
-            x.add_row([r['name'], r['value']])
+        #for r in self.stats.get_metrics():
+        #     x.add_row([r['name'], r['value']])
 
         log.info('results: \n' + str(x) )
 

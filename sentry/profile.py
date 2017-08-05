@@ -1,6 +1,7 @@
 import time, logging
 
 log = logging.getLogger(__name__)
+log.setLevel(logging.WARNING)
 
 def howfast(f):
     """ kinda like xruntime but logs the response to logging """

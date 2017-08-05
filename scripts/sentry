@@ -10,6 +10,8 @@ from sentry import tagline, LOG_FORMAT
 
 log = logging.getLogger('sentry')
 
+#log.setLevel(logging.INFO)
+log.setLevel(logging.WARNING)
 
 def main():
     if len(sys.argv) == 1:
@@ -20,6 +22,7 @@ def main():
     parser.add_argument('--verbose', '-v', action='store_true', default=False)
     parser.add_argument('--config', '-c', action='store', help='config file location')
     parser.add_argument('--benchmark', '-b', action='store_true', help='runs sentry performance benchmark')
+    parser.add_argument('--logfile', '-L', action='store', help='log file location')
 
     # benchmark options:
     group = parser.add_argument_group('benchmark options')
@@ -29,11 +32,17 @@ def main():
 
     options = parser.parse_args()
 
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter(LOG_FORMAT,datefmt='%m/%d/%Y %H:%M:%S')
-    handler.setFormatter(formatter)
-    log.addHandler(handler)
-    log.setLevel(logging.INFO)
+
+    if options.logfile is None:
+       handler = logging.StreamHandler()
+       #formatter = logging.Formatter(LOG_FORMAT,datefmt='%m/%d/%Y %H:%M:%S')
+       formatter = logging.Formatter(LOG_FORMAT,datefmt='%Y-%m-%d %H:%M:%S')
+       handler.setFormatter(formatter)
+       log.addHandler(handler)
+    else:
+       fn_handler = logging.FileHandler(filename=options.logfile, mode="a", delay=True)
+       fn_handler.setFormatter( logging.Formatter (LOG_FORMAT,datefmt='%Y-%m-%d %H:%M:%S'))
+       log.addHandler(fn_handler)
 
     if options.verbose:
         log.setLevel(logging.DEBUG)
